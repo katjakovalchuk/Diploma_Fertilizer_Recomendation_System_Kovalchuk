@@ -1,1 +1,1 @@
-# Diploma_Fertilizer_Recomendation_System_Kovalchuk
+# Precision farming and development of fertilizer recomendation system
