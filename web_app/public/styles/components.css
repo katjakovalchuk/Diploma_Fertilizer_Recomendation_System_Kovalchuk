@@ -1,0 +1,127 @@
+.button-group {
+    display: flex;
+    gap: 2rem;
+}
+
+.button {
+    border: none;
+    border-radius: 20px;
+    text-align: center;
+    cursor: pointer;
+    min-height: 50px;
+    min-width: 240px;
+    font-weight: 700;
+    font-size: 1.2em;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 20%);
+    color: #1e272e;
+}
+
+.button:hover {
+    filter: brightness(95%) saturate(90%);
+}
+
+.yellow {
+    background-color: rgba(237, 221, 83, 1);
+}
+
+.green {
+    background-color: rgba(27, 191, 95, 1);
+}
+
+.input {
+    border: none;
+    border-radius: 20px;
+    min-height: 30px;
+    min-width: 240px;
+    border-color: black;
+    text-align: left;
+    padding: 8px 16px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 20%);
+    color: #1e272e;
+}
+
+.input:hover {
+    filter: brightness(95%) saturate(90%);
+}
+
+.link {
+    align-items: center;
+    color: black;
+    margin-top: 1rem;
+}
+
+.long-button {
+    border: none;
+    border-radius: 20px;
+    text-align: center;
+    cursor: pointer;
+    min-height: 30px;
+    min-width: 240px;
+    font-weight: 700;
+    font-size: 1.2em;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 20%);
+    color: #000000;
+    margin-top: 1rem;
+}
+
+.long-button:hover {
+    filter: brightness(95%) saturate(90%);
+}
+
+.icon {
+    color: black;
+    text-decoration: none;
+    font-size: 3em;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.top-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.bottom-button-left {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    bottom: 30px;
+    left: 30px;
+}
+
+.bottom-button-right {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    bottom: 30px;
+    right: 30px;
+}
+
+.small-button {
+    border: none;
+    border-radius: 20px;
+    text-align: center;
+    cursor: pointer;
+    min-height: 25px;
+    min-width: 120px;
+    font-weight: 500;
+    font-size: 1.2em;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 20%);
+    color: #1e272e;
+}
+
+.upload-button {
+    border: none;
+    border-radius: 5px;
+    color: #000000;
+    cursor: pointer;
+    display: inline-block;
+    max-width: 200px;
+    max-height: 150px;
+    font-weight: 500;
+    position: relative;
+}

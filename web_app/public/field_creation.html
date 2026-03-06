@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Field Creation</title>
+    <link href="./styles/styles.css" rel="stylesheet" />
+    <link href="./styles/components.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alice&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/039d331876.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="centering-vertical">
+        <h1 class="smaller-title">Field creation</h1>
+
+        <div class="fields-grid">
+            <div class="field-group">
+                <label class="field-label" for="field_name">Field Name:</label>
+                <input class="input yellow" type="text" id="field_name" name="field_name" placeholder="Enter Field Name"
+                    required>
+
+                <label class="field-label" for="area">Area:</label>
+                <input class="input yellow" type="text" id="area" name="area" placeholder="Enter Field Area" required>
+
+                <label class="field-label" for="farm">Farm:</label>
+                <input class="input yellow" type="text" id="farm" name="farm" placeholder="Enter Farm name" required>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="crop">Crop:</label>
+                <input class="input yellow" type="text" id="crop" name="crop" placeholder="Enter Crop you want to grow"
+                    required>
+
+                <label class="field-label" for="ton">Ton:</label>
+                <input class="input yellow" type="text" id="ton" name="ton"
+                    placeholder="How many tons of Crop you want to grow?" required>
+
+                <label class="field-label" for="fertilizer_type">Fertilizer type:</label>
+                <select class="input yellow">
+                    <option value="soil">Soil</option>
+                    <option value="foliar">Foliar</option>
+                    <option value="water_soluble">Water Soluble</option>
+                    <option value="drip_irrigation_fertigation">Drip Irrigation/Fertigation</option>
+                    <!-- Ґрунтове Позакореневе Водорозчинне Краплинне / Фертигація -->
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="file">Upload Chemical Soil Analysis:</label>
+                <label for="file" class="input yellow">Upload file</label>
+                <input type="file" id="file" name="file" accept=".csv" style="display: none;" />
+            </div>
+
+            <button class="button green" type="submit">Submit</button>
+
+        </div>
+    </div>
+</body>
