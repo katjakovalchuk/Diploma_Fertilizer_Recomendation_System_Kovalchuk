@@ -1,0 +1,129 @@
+body {
+    font-family: "Alice", serif;
+    font-weight: 400;
+    font-style: normal;
+    background: #40c97a;
+    background: linear-gradient(90deg,
+            rgba(64, 201, 122, 1) 5%,
+            rgba(27, 191, 95, 1) 28%,
+            rgba(144, 185, 102, 1) 51%,
+            rgba(210, 179, 108, 1) 75%,
+            rgba(237, 221, 83, 1) 100%);
+}
+
+.full-page {
+    min-height: 100vh;
+    position: relative;
+}
+
+.centering {
+    display: grid;
+    place-content: center;
+}
+
+.centering-vertical {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.centering-corners {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1.2rem 1.5rem;
+    box-sizing: border-box;
+}
+
+.welcome-title {
+    position: absolute;
+    font-family: "Alice", serif;
+    top: 8px;
+    left: 16px;
+    font-size: 120px;
+    color: #1e272e;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.img-left {
+    position: absolute;
+    bottom: 0;
+    left: 50px;
+    height: 350px;
+}
+
+.img-right {
+    position: absolute;
+    bottom: 0;
+    right: 40px;
+    width: 400px;
+    filter: brightness(0);
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 1rem;
+}
+
+.field-label {
+    font-family: "Alice", serif;
+    font-size: 0.95rem;
+    color: #1e272e;
+    padding-left: 4px;
+}
+
+.left-up-corner {
+    position: absolute;
+    top: 0;
+    left: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.title {
+    position: absolute;
+    font-family: "Alice", serif;
+    top: 8px;
+    font-size: 100px;
+    color: #1e272e;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.smaller-title {
+    display: flex;
+    font-family: "Alice", serif;
+    font-size: 50px;
+    color: #1e272e;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 2rem;
+    margin-top: 6rem;
+}
+
+.file-upload-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.file-name-display {
+    flex: 1;
+    cursor: pointer;
+}

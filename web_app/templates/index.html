@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>Welcome</title>
+    <link href="{{ url_for('static', filename='styles/styles.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='styles/components.css') }}" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alice&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="centering full-page">
+        <h1 class="welcome-title">Welcome</h1>
+        <div class="button-group">
+            <button class="button yellow" type="button" id="button_log_in">Log in</button>
+            <button class="button green" type="button" id="button_sign_up">Sign up</button>
+        </div>
+
+        <img class="img-right" src="{{ url_for('static', filename='images/agrosem_logo.png') }}" alt="Logo">
+        <img class="img-left" src="{{ url_for('static', filename='images/sunflowers.png') }}" alt="Logo">
+    </div>
+    <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+</body>
+
+</html>
