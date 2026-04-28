@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Recommendations</title>
     <link href="{{ url_for('static', filename='styles/styles.css') }}" rel="stylesheet" />
@@ -7,38 +8,59 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Alice&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/039d331876.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
     <h2>Fertilizer Recommendations</h2>
 
     {% if recommendation %}
-    <table border="1" cellpadding="8" cellspacing="0">
+    <div id="metadata" data-recommendation='{{ recommendation | tojson | safe}}'></div>
+    <div style="text-align: right;">
+        <button class="button green" onclick="downloadCSV()">
+            <i class="fa-solid fa-download"></i> Save as CSV
+        </button>
+        <button class="button green" type="button" id="return_nutton">Return to the previous page</button>
+    </div>
+
+    <table id="recommendation-table" border="1" cellpadding="8" cellspacing="0">
         <thead>
             <tr>
                 <th>Zone</th>
                 <th>Elements to address</th>
+                <th>Potential yield increase (%)</th>
                 <th>Fertilizer</th>
                 <th>Amount (kg/ha)</th>
             </tr>
         </thead>
         <tbody>
             {% for zone in recommendation %}
-                {% for i, fert in enumerate(zone.best) %}
-                <tr>
-                    {% if i == 0 %}
-                    <td rowspan="{{ zone.best | length }}">{{ zone.zone_idx }}</td>
-                    <td rowspan="{{ zone.best | length }}">{{ zone.elements }}</td>
-                    {% endif %}
-                    <td>{{ fert.fertilizer }}</td>
-                    <td>{{ "%.2f" | format(fert.amount) }}</td>
-                </tr>
-                {% endfor %}
+            {% if zone.best %}
+            {% for i, fert in enumerate(zone.best) %}
+            <tr>
+                {% if i == 0 %}
+                <td rowspan="{{ zone.best | length }}">{{ zone.zone_name }}</td>
+                <td rowspan="{{ zone.best | length }}">{{ zone.elements }}</td>
+                <td rowspan="{{ zone.best | length }}">{{ "%.2f" | format(zone.percentage_increase) }}%</td>
+                {% endif %}
+                <td>{{ fert.fertilizer }}</td>
+                <td>{{ "%.2f" | format(fert.amount) }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td>{{ zone.zone_name }}</td>
+                <td>—</td>
+                <td>—</td>
+                <td colspan="2">No changes needed</td>
+            </tr>
+            {% endif %}
             {% endfor %}
         </tbody>
     </table>
     {% else %}
     <p>No recommendations available.</p>
     {% endif %}
+    <script src="{{ url_for('static', filename='scripts/recommendation.js') }}"></script>
 </body>
+
 </html>

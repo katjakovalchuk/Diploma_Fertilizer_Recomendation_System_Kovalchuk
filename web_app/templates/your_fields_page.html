@@ -11,22 +11,34 @@
 </head>
 
 <body>
+
     <div class="centering-corners">
-        <div class="left-up-corner">
-            <h1 class="smaller-title">
-                Your fields
-            </h1>
+        <h1 class="smaller-title">
+            Your fields
+        </h1>
+        <div class="centering-horizontal">
+            <button type="button" class="icon" id="add_field_button">
+                <i class="fa-solid fa-circle-plus">
+                </i>
+            </button>
+            <div class="fields-list" id="fields_list">
 
-            <div class="top-buttons">
-                <button type="button" class="icon" id="search_button">
-                    <i class="fa-solid fa-magnifying-glass">
-                    </i>
-                </button>
+                {% set farms = fields | groupby('farm_name') %}
+                {% for farm_name, farm_fields in farms %}
+                <div class="farm-group">
+                    <div class="farm-title">
+                        {{ farm_name }}
+                    </div>
+                    {% for field in farm_fields %}
+                    <button class="button yellow field-card one-field-button" data-field-name="{{ field.field_name }}">
+                        <span class="field-card-name">{{ field.field_name }}</span>
+                    </button>
+                    {% endfor %}
 
-                <button type="button" class="icon" id="add_field_button">
-                    <i class="fa-solid fa-circle-plus">
-                    </i>
-                </button>
+                </div>
+                {% else %}
+                <p class="field-label">No fields added yet.</p>
+                {% endfor %}
             </div>
         </div>
 
@@ -37,17 +49,6 @@
             </a>
         </div>
 
-        <!-- <div class="bottom-button-right">
-            <button type="button" class="icon" id="information">
-                <i class="fa-solid fa-info">
-                </i>
-            </button>
-            <div class="tooltip" id="info_tooltip">
-                + - button for field creation
-                search - button for searching the field that you need
-                user - redirects you to your user page
-            </div> -->
-        <!-- </div>  -->
     </div>
     <script src="{{ url_for('static', filename='scripts/your_fields.js') }}"></script>
 </body>

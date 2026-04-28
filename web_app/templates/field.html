@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{ field_name }} — Field Data</title>
+    <link href="{{ url_for('static', filename='styles/styles.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='styles/components.css') }}" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alice&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/039d331876.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div>
+        <div class="field-header">
+            <button class="button yellow" type="button" id="return_nutton">Return to the previous page</button>
+            <div class="field-title-group">
+                <h1 class="smaller-title">{{ field_name }}</h1>
+                <p class="field-crop">{{ crop_name }}</p>
+            </div>
+        </div>
+        <details open>
+            <summary>Soil Analysis</summary>
+            <div>
+                {% if soil_zones %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th>Area (ha)</th>
+                            {% for col in ['pH','P','K','Mg','B','Cu','Mn','Zn','Ca','Fe','Na','S','Mo','OM','C.E.C'] %}
+                            <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for zone in soil_zones %}
+                        <tr>
+                            <td>{{ zone.zone_name }}</td>
+                            <td>{{ zone.area }}</td>
+                            {% for col in ['pH','P','K','Mg','B','Cu','Mn','Zn','Ca','Fe','Na','S','Mo','OM','C.E.C'] %}
+                            <td class="value-cell">
+                                {% set val = zone[col] %}
+                                {% set color = zone[col ~ '_color'] %}
+                                {% set level = zone[col ~ '_level'] %}
+
+                                {% if val is not none %}
+                                <div class="cell-stack">
+                                    <div class="cell-value">{{ "%.2f"|format(val) }}</div>
+
+                                    {% if color is not none and level is not none %}
+                                    <div class="cell-level" style="color: {{ color }}">
+                                        {{ level }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No soil analysis data available.</p>
+                {% endif %}
+            </div>
+        </details>
+
+        <details>
+            <summary>Fertilizer Recommendation</summary>
+            <div>
+                {% if recommendation %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th>Elements to address</th>
+                            <th>Yield increase (%)</th>
+                            <th>Fertilizer</th>
+                            <th>Amount (kg/ha)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for zone in recommendation %}
+                        {% if zone.best %}
+                        <tr>
+                            {% set fert = zone.best[0] %}
+                            <td>{{ zone.zone_name }}</td>
+                            <td>{{ zone.elements }}</td>
+                            <td>{{ "%.2f"|format(zone.percentage_increase) }}%</td>
+                            <td>{{ fert.fertilizer }}</td>
+                            <td>{{ "%.2f"|format(fert.amount) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td>{{ zone.zone_name }}</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td colspan="2">No changes needed</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No recommendations available for this field.</p>
+                {% endif %}
+            </div>
+        </details>
+
+    </div>
+    <script src="{{ url_for('static', filename='scripts/user_page.js') }}"></script>
+
+</body>
+
+</html>

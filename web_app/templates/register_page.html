@@ -10,6 +10,8 @@
 </head>
 
 <body>
+    <!-- <div class="loader"></div> -->
+
     <div class="centering-vertical full-page">
         <h1 class="title">Sign up</h1>
 
@@ -24,8 +26,35 @@
                         required>
 
                     <label for="region">Region:</label>
-                    <input class="input yellow" type="text" id="region" name="region" placeholder="Enter your Region"
-                        required>
+                    <select class="input yellow" id="region" name="region" required>
+                        <option value="" disabled selected>Select your region</option>
+
+                        <option value="Vinnytsia Oblast">Vinnytsia</option>
+                        <option value="Volyn Oblast">Volyn</option>
+                        <option value="Dnipropetrovsk Oblast">Dnipropetrovsk</option>
+                        <option value="Donetsk Oblast">Donetsk</option>
+                        <option value="Zhytomyr Oblast">Zhytomyr</option>
+                        <option value="Zakarpattia Oblast">Zakarpattia</option>
+                        <option value="Zaporizhzhia Oblast">Zaporizhzhia</option>
+                        <option value="Ivano-Frankivsk Oblast">Ivano-Frankivsk</option>
+                        <option value="Kyiv Oblast">Kyiv</option>
+                        <option value="Kirovohrad Oblast">Kirovohrad</option>
+                        <option value="Luhansk Oblast">Luhansk</option>
+                        <option value="Lviv Oblast">Lviv</option>
+                        <option value="Mykolaiv Oblast">Mykolaiv</option>
+                        <option value="Odesa Oblast">Odesa</option>
+                        <option value="Poltava Oblast">Poltava</option>
+                        <option value="Rivne Oblast">Rivne</option>
+                        <option value="Sumy Oblast">Sumy</option>
+                        <option value="Ternopil Oblast">Ternopil</option>
+                        <option value="Kharkiv Oblast">Kharkiv</option>
+                        <option value="Kherson Oblast">Kherson</option>
+                        <option value="Khmelnytskyi Oblast">Khmelnytskyi</option>
+                        <option value="Cherkasy Oblast">Cherkasy</option>
+                        <option value="Chernihiv Oblast">Chernihiv</option>
+                        <option value="Chernivtsi Oblast">Chernivtsi</option>
+                        <option value="Crimea">Autonomous Republic of Crimea</option>
+                    </select>
                 </div>
 
                 <div class="field-group">
@@ -44,7 +73,7 @@
 
             <button class="long-button yellow" type="button" id="submit_sign_up">Submit</button>
 
-            <a class="link" href="login_page.html">I already have an account</a>
+            <a class="link" href="/diploma/fertilizer_recommendation/login">I already have an account</a>
 
             <img class="img-right" src="{{ url_for('static', filename='images/agrosem_logo.png') }}" alt="Logo">
             <img class="img-left" src="{{ url_for('static', filename='images/sunflowers.png') }}" alt="Logo">

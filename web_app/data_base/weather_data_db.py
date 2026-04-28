@@ -55,7 +55,7 @@ class WeatherDataPreparation:
             (location, year),
         )
         result_ = self.cur.fetchall()
-        print(f"DB result count: {len(result_)}")
+        # print(f"DB result count: {len(result_)}")
         columns = [desc[0] for desc in self.cur.description]
         df = pd.DataFrame(result_, columns=columns)
         # df = df.drop(columns=["year"]).reset_index(drop=True)
@@ -64,7 +64,7 @@ class WeatherDataPreparation:
             weather_data = df
         else:
             weather_data = None
-        print("found weather data in db for location ", location, " and year ", year)
+        # print("found weather data in db for location ", location, " and year ", year)
 
         return weather_data
 
@@ -100,8 +100,8 @@ class WeatherDataPreparation:
 
     def get_weather_from_api(self, api_query):
         response = requests.get(api_query)
-        print("STATUS:", response.status_code)
-        print("TEXT:", response.text[:300])
+        # print("STATUS:", response.status_code)
+        # print("TEXT:", response.text[:300])
 
         if response.status_code != 200:
             raise Exception(
@@ -120,6 +120,7 @@ class WeatherDataPreparation:
     def format_data(self, weather_data):
         weather_data["datetime"] = pd.to_datetime(weather_data["datetime"])
         weather_data["month"] = weather_data["datetime"].dt.month
+        weather_data["year"] = weather_data["datetime"].dt.year
 
         weather_df_ = (
             weather_data.groupby(["year", "month"])
@@ -173,15 +174,17 @@ class WeatherDataPreparation:
         col_names = ", ".join(columns) + ", location"
 
         for _, row in weather_data.iterrows():
-            row_values = [row[col] for col in columns] + [location]
             self.cur.execute(
-                f"""
-                    INSERT INTO weather_data ({col_names})
-                    VALUES ({values})
-                    ON CONFLICT (location, year) DO NOTHING
-                """,
-                row_values,
+                "SELECT 1 FROM weather_data WHERE location = %s AND year = %s",
+                (location, row["year"]),
             )
+            if self.cur.fetchone() is None:
+                row_values = [row[col] for col in columns] + [location]
+                self.cur.execute(
+                    f"INSERT INTO weather_data ({col_names}) VALUES ({values})",
+                    row_values,
+                )
+        self.connection.commit()
 
     def get_weather_data(self):
         location = self.get_location_from_db()

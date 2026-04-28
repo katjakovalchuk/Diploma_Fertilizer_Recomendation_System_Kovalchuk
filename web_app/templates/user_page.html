@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html>
 
 <head>
     <title>User</title>
@@ -11,8 +12,31 @@
 </head>
 
 <body>
-    <p>Name: {{ user[0] }}</p>
-    <p>Surname: {{ user[1] }}</p>
-    <p>Email: {{ user[2] }}</p>
-    <p>Region: {{ user[3] }}</p>
+    <!-- <div class="loader"></div> -->
+
+    <h2>User data</h2>
+
+    <div class="user-info">
+        <div class=".user-info-data-row">
+            <span class="user-info-label">Name </span>
+            <span class="user-info-color">{{ user[0] }}</span>
+        </div>
+        <div class=".user-info-data-row">
+            <span class="user-info-label">Surname </span>
+            <span class="user-info-color">{{ user[1] }}</span>
+        </div>
+        <div class=".user-info-data-row">
+            <span class="user-info-label">Gmail </span>
+            <span class="user-info-color">{{ user[2] }}</span>
+        </div>
+        <div class=".user-info-data-row">
+            <span class="user-info-label">Region </span>
+            <span class="user-info-color">{{ user[3] }}</span>
+        </div>
+    </div>
+
+    <button class="button yellow" type="button" id="return_nutton">Return to the previous page</button>
+    <script src="{{ url_for('static', filename='scripts/user_page.js') }}"></script>
 </body>
+
+</html>

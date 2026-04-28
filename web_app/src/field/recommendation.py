@@ -17,11 +17,11 @@ class Recommendation:
 
     oxid_form_mapping = {"P": 2.29, "K": 1.2, "Mg": 1.66, "Ca": 1.4}
 
-    def __init__(self, user_id, crop_id, fertilizer_type):
+    def __init__(self, user_id, crop_id, field_name, target_yield):
         self.user_id = user_id
         self.crop_id = crop_id
-        self.fertilizer_type = fertilizer_type
-        # print("FERTILIZER TYPE", self.fertilizer_type)
+        self.field_name = field_name
+        self.target_yield = target_yield
 
         self.connection = get_connection()
         self.cur = self.connection.cursor()
@@ -30,15 +30,18 @@ class Recommendation:
         self.cur.execute(
             """
                 SELECT * 
-                FROM crop_nutritions 
+                FROM crop_nutritions
                 WHERE "index" = %s
             """,
             (self.crop_id,),
         )
         result = self.cur.fetchone()
+        print(result)
 
         if result:
-            crop_nutrition_uptake = result[0]
+            columns = [desc[0] for desc in self.cur.description]
+            crop_nutrition_uptake = pd.DataFrame([result], columns=columns)
+            print(crop_nutrition_uptake)
         else:
             crop_nutrition_uptake = None
 
@@ -58,7 +61,6 @@ class Recommendation:
             fertilizers = pd.DataFrame(result, columns=columns)
         else:
             fertilizers = None
-        # print("FERTILIZERS, ", fertilizers)
         return fertilizers
 
     def elems_per_zone(self, df_of_zone):
@@ -83,32 +85,68 @@ class Recommendation:
         return cols
 
     def calculate_deficit(self, elem, original_, new_):
+        if abs(original_) < 1e-9:
+            return 0.0
         deficit = new_ - original_
-        deficit_kg = deficit * 3.75
+        if elem in self.micro_:
+            deficit_kg = (deficit * 3.75) / 1000
+        else:
+            deficit_kg = deficit * 3.75
+
         if elem in self.oxid_form_mapping.keys():
             deficit_kg = deficit_kg * self.oxid_form_mapping[elem]
         return deficit_kg
 
+    def get_crop_need(self, elem, target_yield, crops_nutritients):
+        if elem in self.oxid_form_of_elems:
+            oxid_value = (
+                crops_nutritients.get(self.oxid_form_of_elems[elem], 0) * target_yield
+            )
+            return oxid_value * self.oxid_form_mapping[elem]
+        elif elem in self.micro_:
+            g_per_ha = crops_nutritients.get(elem, 0) * target_yield
+            return g_per_ha / 1000
+        else:
+            return crops_nutritients.get(elem, 0) * target_yield
+
     def fertilizer_mapping(self):
         ferlizers = self.get_fertilizers_data()
-        crops_nutrients = self.get_crop_nutrition_uptake()
-        simulation_ = Simulation(self.user_id, self.crop_id)
-        simulation = pd.DataFrame(simulation_.return_simulation())
+        if ferlizers is None or ferlizers.empty:
+            raise ValueError("Fertilizers table is empty")
 
-        # print("GOT SIMULATION in RECOMMENDATION ", simulation)
+        crops_nutrients = self.get_crop_nutrition_uptake().iloc[0].to_dict()
+        if crops_nutrients is None:
+            raise ValueError(f"No nutrition data for crop '{self.crop_id}'")
+
+        simulation_ = Simulation(self.user_id, self.crop_id, self.field_name)
+
+        simulation = pd.DataFrame(simulation_.return_simulation())
+        zone_names = simulation_.return_zone_names()
 
         simulation_per_zone = simulation.loc[
             simulation.groupby("zone_idx")["simulated_prediction"].idxmax()
         ]
-        print("SIMULATIONS, ", len(simulation_per_zone))
+        simulation_per_zone["zone_name"] = simulation_per_zone["zone_idx"].map(
+            zone_names
+        )
 
         results = []
 
         for _, zone_df in simulation_per_zone.iterrows():
             elems = self.elems_per_zone(zone_df)
-            # print("elems in RECOMMENDATION ", elems)
+
+            if not elems:
+                results.append(
+                    {
+                        "zone_name": zone_df["zone_name"],
+                        "elements": "—",
+                        "best": [],
+                        "percentage_increase": None,
+                    }
+                )
+                continue
+
             cols = self.oxid_form_convertation(elems)
-            # print("cols in RECOMMENDATION ", cols)
 
             fertilizer = ferlizers[ferlizers[cols].any(axis=1)].copy()
 
@@ -117,14 +155,19 @@ class Recommendation:
                     elem, elem_values[0], elem_values[1]
                 )
 
-                if elem in self.oxid_form_of_elems.keys():
+                crop_need = self.get_crop_need(elem, self.target_yield, crops_nutrients)
+
+                if elem in self.oxid_form_mapping.keys():
+                    total_kg = deficit_kg + crop_need
+
                     fertilizer[
                         f"needed kg/he for {self.oxid_form_of_elems[elem]} %"
-                    ] = deficit_kg / (
+                    ] = total_kg / (
                         fertilizer[f"{self.oxid_form_of_elems[elem]} %"] / 100
                     )
                 else:
-                    fertilizer[f"needed kg/he for {elem} %"] = deficit_kg / (
+                    total_kg = deficit_kg + crop_need
+                    fertilizer[f"needed kg/he for {elem} %"] = total_kg / (
                         fertilizer[f"{elem} %"] / 100
                     )
 
@@ -136,18 +179,22 @@ class Recommendation:
                 [col for col in needed_cols if col in fertilizer.columns]
             ].sum(axis=1)
 
-            best = fertilizer.sort_values("needed kg/he").head(5)
-            # print(best[["product_name", "needed kg/he"]].head())
+            best = fertilizer.sort_values("needed kg/he").head(1)
+
             results.append(
                 {
-                    "zone_idx": int(zone_df["zone_idx"]),
+                    "zone_name": zone_df["zone_name"],
                     "elements": ", ".join(elems.keys()),
                     "best": best[["product_name", "needed kg/he"]]
-                    .rename(columns={"product_name": "fertilizer", "needed kg/he": "amount"})
+                    .rename(
+                        columns={
+                            "product_name": "fertilizer",
+                            "needed kg/he": "amount",
+                        }
+                    )
                     .to_dict("records"),
+                    "percentage_increase": zone_df["percentage_increase"],
                 }
             )
-        # print("RESULT:    ", len(results))
-        # print(results)
 
         return results

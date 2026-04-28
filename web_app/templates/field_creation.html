@@ -11,6 +11,8 @@
 </head>
 
 <body>
+    <!-- <div class="loader"></div> -->
+
     <div class="centering-vertical">
         <h1 class="smaller-title">Field creation</h1>
 
@@ -34,11 +36,15 @@
 
                 <div class="field-group">
                     <label class="field-label" for="crop">Crop:</label>
-                    <input class="input yellow" type="text" id="crop" name="crop"
-                        placeholder="Enter Crop you want to grow" required>
+                    <select class="input yellow" id="crop" name="crop">
+                        <option value="Sunflower">Sunflower</option>
+                        <option value="Corn">Corn</option>
+                        <option value="Rapeseed">Rapeseed</option>
+                        <option value="Soya">Soya</option>
+                    </select>
 
-                    <label class="field-label" for="ton">Ton:</label>
-                    <input class="input yellow" type="text" id="ton" name="ton"
+                    <label class="field-label" for="target_yield">Ton:</label>
+                    <input class="input yellow" type="text" id="target_yield" name="target_yield_field"
                         placeholder="How many tons of Crop you want to grow?" required>
 
                     <label class="field-label" for="fertilizer_type">Fertilizer type:</label>
@@ -49,7 +55,6 @@
                         <option value="Seed treatment (g/L)"> Seed treatment (g/L)</option>
                         <option value="Water-soluble">Water Soluble</option>
                         <option value="Drip-irrigation/ Fertigation">Drip Irrigation/Fertigation</option>
-                        <!-- Ґрунтове Позакореневе Водорозчинне Краплинне / Фертигація -->
                     </select>
                 </div>
 
@@ -64,6 +69,7 @@
             </div>
         </form>
     </div>
+    <script src="{{ url_for('static', filename='scripts/field_creation.js') }}"></script>
 </body>
 
 </html>

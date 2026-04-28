@@ -125,3 +125,49 @@
     font-weight: 500;
     position: relative;
 }
+
+/* https://css-loaders.com/shuriken/ -> 8 */
+/* .loader {
+    width: 80px;
+    aspect-ratio: 1;
+    --c: #8d7958 91%, #0000;
+    background:
+        radial-gradient(30% 50% at -3px 55%, var(--c)) top right,
+        radial-gradient(30% 50% at -3px 45%, var(--c)) bottom right,
+        radial-gradient(30% 50% at calc(100% + 3px) 55%, var(--c)) top left,
+        radial-gradient(30% 50% at calc(100% + 3px) 45%, var(--c)) bottom left,
+        radial-gradient(50% 30% at 45% calc(100% + 3px), var(--c)) top right,
+        radial-gradient(50% 30% at 45% -3px, var(--c)) bottom right,
+        radial-gradient(50% 30% at 55% calc(100% + 3px), var(--c)) top left,
+        radial-gradient(50% 30% at 55% -3px, var(--c)) bottom left;
+    background-size: 50.1% 50.1%;
+    background-repeat: no-repeat;
+    -webkit-mask: radial-gradient(circle 5px, #0000 90%, #000);
+    animation: l8 1.5s infinite linear;
+}
+
+@keyframes l8 {
+    100% {
+        transform: rotate(1turn)
+    }
+} */
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+}
+
+th {
+    background-color: #824b4b95;
+    text-align: left;
+    padding: 8px;
+    font-weight: 600;
+}
+
+td {
+    padding: 8px;
+    border-bottom: 1px solid #eeeeeea7;
+    vertical-align: top;
+    word-break: keep-all;
+}

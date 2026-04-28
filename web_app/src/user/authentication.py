@@ -1,5 +1,8 @@
-from flask import Blueprint, request, redirect, render_template, session
+from flask import Blueprint, request, redirect, render_template, session, jsonify
 from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+
+import re
 
 from data_base.connection import get_connection
 
@@ -7,6 +10,7 @@ BASE = "/diploma/fertilizer_recommendation"
 auth = Blueprint("auth", __name__)
 
 pass_hasher = PasswordHasher()
+email_regex = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}")
 
 
 @auth.route(BASE + "/register", methods=["GET", "POST"])
@@ -18,15 +22,27 @@ def register():
         gmail = request.form["gmail"]
         password = request.form["password"]
         repeat_password = request.form["repeat_password"]
-        # print(request.form)
+
+        if len(password) < 8:
+            return jsonify({"error": "Password must be at least 8 characters long"}), 400
 
         if password != repeat_password:
-            return "Password or Repeat password id incorrect", 400
-
+            return jsonify({"error": "Passwords do not match"}), 400
+        
         hash_password = pass_hasher.hash(password)
+
+        if not email_regex.match(gmail):
+            return jsonify({"error": "Invalid email format"}), 400
+
+        if not all([name, surname, region, gmail, password]):
+            return jsonify({"error": "Please, fill all fields"}), 400
 
         conn = get_connection()
         cur = conn.cursor()
+        cur.execute("SELECT id FROM users WHERE gmail = %s", (gmail,))
+        if cur.fetchone():
+            return jsonify({"error": "Email already registered"}), 409
+
         cur.execute(
             """
             INSERT INTO users (name, surname, region, gmail, password)
@@ -46,7 +62,6 @@ def login():
     if request.method == "POST":
         gmail = request.form["gmail"]
         password = request.form["password"]
-        # print(request.form)
 
         conn = get_connection()
         cur = conn.cursor()
@@ -56,14 +71,20 @@ def login():
             """,
             (gmail,),
         )
-        user_id, user_password = cur.fetchone()
-        # print(user_id)
-        # print(user_password)
-        # print(user_password[0])
+        result = cur.fetchone()
+        if not result:
+            return jsonify({"error":"Invalid credentials"}), 401
+
+        user_id, user_password = result
         conn.close()
 
-        if pass_hasher.verify(user_password, password):
-            session["user_id"] = user_id
-            return redirect(BASE + "/your_fields_page")
+        try:
+            pass_hasher.verify(user_password, password)
+        except VerifyMismatchError:
+            return jsonify({"error": "Invalid credentials"}), 401
+
+        session["user_id"] = user_id
+
+        return redirect(BASE + "/your_fields_page")
 
     return render_template("login_page.html")

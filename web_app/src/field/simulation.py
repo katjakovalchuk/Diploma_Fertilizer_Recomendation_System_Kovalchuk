@@ -38,23 +38,27 @@ class Simulation:
         "Na",
         "pH",
         "C.E.C",
-        "Crop_33",
+        "Crop_22",
         "Crop_34",
         "Crop_41",
         "Crop_45",
+        "Crop_33",
         "Crop_174",
-        "Crop_22",
     ]
 
     CHEM_LEVELS = ["Very low", "Low", "Medium", "High", "Very high"]
+    ALLOWED_CHEM_LEVELS = ["Very low", "Low", "Medium", "High"]
+
+    ZONE_NAME = dict()
 
     XGB_MODEL = joblib.load("./models/xgb_weather_.sav")
     XGB_SCALER = joblib.load("./models/scaler_xgb_weather_.pkl")
 
-    def __init__(self, user_id, crop_id):
+    def __init__(self, user_id, crop_id, field_name):
         self.user_id = user_id
-        self.year = datetime.now().year - 2
+        self.year = datetime.now().year - 1
         self.crop_id = crop_id
+        self.field_name = field_name
 
         self.connection = get_connection()
         self.cur = self.connection.cursor()
@@ -69,9 +73,9 @@ class Simulation:
             """
                 SELECT soil_analysis
                 FROM field_data 
-                WHERE id = %s
+                WHERE user_id = %s and field_name = %s
             """,
-            (self.user_id,),
+            (self.user_id, self.field_name),
         )
         print("SELF USER ID")
         print(self.user_id)
@@ -81,14 +85,22 @@ class Simulation:
             soil_analysis = result[0]
         else:
             soil_analysis = None
-        # print("SOIL ANALYSIS in SIMULATION")
+        # print("SOIL ANALYSIS in SIMULATION, ", soil_analysis)
         return soil_analysis
-
+    
     def features_formulation(self):
         features = []
 
         soil_analysis = pd.DataFrame(self.get_data())
+        if soil_analysis is None:
+            raise ValueError(f"No soil data for field '{self.field_name}'")
+        
+        self.ZONE_NAME = soil_analysis["Name"].to_dict()
+
         weather_data = self.get_weather_data()
+        if weather_data is None or weather_data.empty:
+            raise ValueError("Weather data unavailable")
+        
         crop = self.crop_id
 
         soil_data = soil_analysis.drop(
@@ -113,7 +125,7 @@ class Simulation:
             errors="ignore",
         )
         soil_data = soil_data.rename(columns={"Organic M": "Organic_M"})
-  
+
         X_ = pd.DataFrame(index=range(len(soil_data)), columns=self.FEATURES)
 
         X_.update(soil_data)
@@ -129,8 +141,12 @@ class Simulation:
                 "year",
                 "location",
                 "index",
-            ]
+            ],
+            errors="ignore",
         )
+
+        scaler_features = self.XGB_SCALER.feature_names_in_.tolist()
+        X_ = X_[scaler_features]
 
         # print("FEATURES IN SIMULATION, ", X_)
         return X_
@@ -150,7 +166,7 @@ class Simulation:
             crop_needs = result[0]
         else:
             crop_needs = None
-        # print("CHEMICALS NEED FOR CROP IN SIMULATION")
+        print("CHEMICALS NEED FOR CROP IN SIMULATION ", crop_needs)
         return crop_needs
 
     def epsilots_data(self, elem):
@@ -180,15 +196,24 @@ class Simulation:
         for _, row in elem_data.iterrows():
             # print(row)
             if row["min_elem_value"] <= value <= row["max_elem_value"]:
-                elem_level = row["content_level"]
-                break
+                level = row["content_level"]
+                if level in self.ALLOWED_CHEM_LEVELS:
+                    elem_level = level
+                    break
 
         if elem_level is None or elem_level not in self.CHEM_LEVELS:
             return []
 
         level_index = self.CHEM_LEVELS.index(elem_level)
         elem_levels_to_try = self.CHEM_LEVELS[level_index + 1 :]
-        return elem_levels_to_try
+        levels = []
+        for level in elem_levels_to_try:
+            if level in self.ALLOWED_CHEM_LEVELS:
+                levels.append(level)
+        return levels
+
+    def calculate_percentage_increase(self, orig_value, new_value):
+        return ((new_value - orig_value) / abs(orig_value)) * 100
 
     def simulation(self, X_):
         columns = X_.columns
@@ -239,14 +264,14 @@ class Simulation:
                         if elem_data.empty:
                             continue
 
-                        if level != "Very high":
-                            X_simulation.iloc[0, elem] = elem_data[
-                                "max_elem_value"
-                            ].values[0]
-                        else:
-                            X_simulation.iloc[0, elem] = elem_data[
-                                "min_elem_value"
-                            ].values[0]
+                        # if level != "Very high":
+                        X_simulation.iloc[0, elem] = elem_data[
+                            "max_elem_value"
+                        ].values[0]
+                        # else:
+                        #     X_simulation.iloc[0, elem] = elem_data[
+                        #         "min_elem_value"
+                        #     ].values[0]
 
                     data_.append(X_simulation.values[0])
                     technical_data.append(
@@ -263,6 +288,18 @@ class Simulation:
                     )
 
             if not data_:
+                HISTORY_.append(
+                    {
+                        "zone_idx": j,
+                        "combo_features": [],
+                        "area": X_["area"][j],
+                        "orig_value": [],
+                        "fetures_values": [],
+                        "orig_prediction": orig_prediction[0],
+                        "simulated_prediction": orig_prediction[0],
+                        "percentage_increase": 0.0,
+                    }
+                )
                 continue
 
             new_X = pd.DataFrame(data_, columns=X_.columns)
@@ -270,14 +307,20 @@ class Simulation:
             X_simulations_scaled = self.XGB_SCALER.transform(new_X)
             simulated_prediction = self.XGB_MODEL.predict(X_simulations_scaled)
 
-            for tech_data, simulated_prediction in zip(
-                technical_data, simulated_prediction
-            ):
+            for tech_data, sim_pred in zip(technical_data, simulated_prediction):
                 one_prediction = tech_data.copy()
-                one_prediction["simulated_prediction"] = simulated_prediction
+                orig_prediction = one_prediction["orig_prediction"]
+                one_prediction["simulated_prediction"] = sim_pred
+                one_prediction["percentage_increase"] = (
+                    self.calculate_percentage_increase(orig_prediction, sim_pred)
+                )
                 HISTORY_.append(one_prediction)
 
         return HISTORY_
+
+    def return_zone_names(self):
+        print(self.ZONE_NAME)
+        return self.ZONE_NAME
 
     def return_simulation(self):
         X_ = self.features_formulation()
