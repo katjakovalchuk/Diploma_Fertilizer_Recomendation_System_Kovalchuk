@@ -2,10 +2,10 @@
 Module for generating fertilizer recommendations.
 """
 
+import pandas as pd
+
 from data_base.connection import get_connection
 from src.field.simulation import Simulation
-
-import pandas as pd
 
 
 class Recommendation:
